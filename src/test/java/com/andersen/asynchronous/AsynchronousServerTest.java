@@ -15,7 +15,7 @@ public class AsynchronousServerTest {
     AsynchronousServerImpl server;
 
     @Before
-    public void startServer(){
+    public void startServer() {
         server = new AsynchronousServerImpl(new InetSocketAddress("localhost", 32454));
         server.start();
     }
@@ -57,7 +57,7 @@ public class AsynchronousServerTest {
         while (!executor.isTerminated()) {
         }
 
-        Assert.assertEquals(1000,server.getTotalNumbersOfClients());
+        Assert.assertEquals(1000, server.getTotalNumbersOfClients());
     }
 
     @After

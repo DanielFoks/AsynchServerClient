@@ -46,10 +46,10 @@ public class AsynchronousServerImpl extends Thread implements AsynchronousServer
     private static final Logger log = Logger.getLogger(AsynchronousServerImpl.class);
 
     /**
-     *  totalNumbersOfClients counts the number of clients that have been connected for the entire server lifetime.
-     *  connectedClients counts the number of clients that are connected now.
+     * totalNumbersOfClients counts the number of clients that have been connected for the entire server lifetime.
+     * connectedClients counts the number of clients that are connected now.
      */
-    private int totalNumbersOfClients,connectedClients = 0;
+    private int totalNumbersOfClients, connectedClients = 0;
 
 
     public AsynchronousServerImpl(InetSocketAddress inetSocketAddress) {
@@ -147,7 +147,7 @@ public class AsynchronousServerImpl extends Thread implements AsynchronousServer
         SocketChannel client = serverChannel.accept();
         client.configureBlocking(false);
         client.register(selector, SelectionKey.OP_READ);
-        log.info("New client (" + client.getLocalAddress() + " | "+client.getRemoteAddress()+") was connected.");
+        log.info("New client (" + client.getLocalAddress() + " | " + client.getRemoteAddress() + ") was connected.");
     }
 
 
@@ -162,7 +162,7 @@ public class AsynchronousServerImpl extends Thread implements AsynchronousServer
         SocketAddress local = client.getLocalAddress();
         SocketAddress remote = client.getRemoteAddress();
         client.close();
-        log.info("New client (" + local + " | "+remote+") was disconnected.");
+        log.info("New client (" + local + " | " + remote + ") was disconnected.");
     }
 
 
@@ -178,7 +178,7 @@ public class AsynchronousServerImpl extends Thread implements AsynchronousServer
         SocketChannel client = (SocketChannel) clientSelectionKey.channel();
         client.read(byteBuffer);
         String output = new String(byteBuffer.array()).trim();
-        if (log.isDebugEnabled()){
+        if (log.isDebugEnabled()) {
             log.debug("Message: \"" + output + "\"" + " was received");
         }
         return output;
@@ -197,7 +197,7 @@ public class AsynchronousServerImpl extends Thread implements AsynchronousServer
         ByteBuffer buffer = ByteBuffer.wrap(message.getBytes());
         try {
             client.write(buffer);
-            if (log.isDebugEnabled()){
+            if (log.isDebugEnabled()) {
                 log.debug("Message: \"" + message + "\"" + " was sent");
             }
             return true;

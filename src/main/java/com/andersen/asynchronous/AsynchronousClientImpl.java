@@ -11,7 +11,7 @@ import java.nio.channels.SocketChannel;
 /**
  * Asynchronous client.
  */
-public class AsynchronousClientImpl implements AsynchronousClient{
+public class AsynchronousClientImpl implements AsynchronousClient {
 
     /**
      * Clients SocketChannel.
@@ -35,7 +35,7 @@ public class AsynchronousClientImpl implements AsynchronousClient{
         try {
             socketChannel = createConnection(inetSocketAddress);
         } catch (IOException e) {
-            log.error("Can not create client SocketChannel: " + e.getMessage(),e);
+            log.error("Can not create client SocketChannel: " + e.getMessage(), e);
         }
 
         clientChannel = socketChannel;
@@ -69,7 +69,7 @@ public class AsynchronousClientImpl implements AsynchronousClient{
         String output = new String(clientBuffer.array()).trim();
         clientBuffer.flip();
 
-        if (log.isDebugEnabled()){
+        if (log.isDebugEnabled()) {
             log.debug("Message: \"" + output + "\"" + " was received");
         }
 
@@ -81,22 +81,23 @@ public class AsynchronousClientImpl implements AsynchronousClient{
      *
      * @param message Message to be sent.
      * @return true if message was sent. False if was not.
-     * @throws IOException if can not send the message.
+     * @throws IOException          If can not send the message.
+     * @throws InterruptedException If can not Thread.sleep.
      */
     @Override
     public boolean sendMessage(String message) throws InterruptedException {
         clientBuffer = ByteBuffer.wrap(message.getBytes());
         try {
 
-         clientChannel.write(clientBuffer);
+            clientChannel.write(clientBuffer);
             clientBuffer.clear();
-            if (log.isDebugEnabled()){
+            if (log.isDebugEnabled()) {
                 log.debug("Message: \"" + message + "\"" + " was sent");
             }
             Thread.sleep(1000);
             return true;
         } catch (IOException e) {
-            log.error("Can not send the message: " + e.getMessage(),e);
+            log.error("Can not send the message: " + e.getMessage(), e);
             return false;
         }
     }

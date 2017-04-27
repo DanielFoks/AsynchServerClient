@@ -8,7 +8,7 @@ import java.nio.channels.ServerSocketChannel;
 /**
  * Server interface.
  */
-public interface AsynchronousServer extends AsynchronousClientServer{
+public interface AsynchronousServer extends AsynchronousClientServer {
 
     /**
      * Create ServerSocketChannel.
