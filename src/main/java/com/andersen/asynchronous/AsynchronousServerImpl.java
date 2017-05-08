@@ -3,6 +3,7 @@ package com.andersen.asynchronous;
 import com.andersen.asynchronous.interfaces.AsynchronousServer;
 import org.apache.log4j.Logger;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -11,8 +12,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 
 /**
@@ -51,6 +51,8 @@ public class AsynchronousServerImpl extends Thread implements AsynchronousServer
      */
     private int totalNumbersOfClients, connectedClients = 0;
 
+    private BufferedReader bufferedReader;
+
 
     public AsynchronousServerImpl(InetSocketAddress inetSocketAddress) {
 
@@ -82,11 +84,12 @@ public class AsynchronousServerImpl extends Thread implements AsynchronousServer
 
             if (readyChannels == 0) continue;
 
-            Set selectedKeys = selector.selectedKeys();
-            Iterator iterator = selectedKeys.iterator();
+            Set<SelectionKey> selectedKeys = selector.selectedKeys();
+
+            Iterator<SelectionKey> iterator = selectedKeys.iterator();
 
             while (iterator.hasNext()) {
-                clientSelectionKey = (SelectionKey) iterator.next();
+                clientSelectionKey = iterator.next();
 
                 if (clientSelectionKey.isAcceptable()) {
                     try {
@@ -98,18 +101,33 @@ public class AsynchronousServerImpl extends Thread implements AsynchronousServer
                     }
                 } else if (clientSelectionKey.isReadable()) {
                     try {
-                        String receivedMessage = readMessage();
-                        sendMessage(receivedMessage);
-                        if (receivedMessage.equals("Exit")) {
-                            closeClientConnection();
-                            log.info("Connected clients: " + --connectedClients);
+                        List<String> messages = readMessages();
+                        if (readMessages()!=null){
+                            inner:
+                            for (String message:messages){
+
+                                if (message.equals("exit")) {
+                                    closeClientConnection();
+                                    log.info("Connected clients: " + --connectedClients);
+                                    break inner;
+
+                                }else {
+
+                                    sendMessage(message.toUpperCase());
+
+                                }
+
+                            }
                         }
                     } catch (IOException e) {
                         log.error("Can not read the message: " + e.getMessage(), e);
                     }
                 }
-
-                iterator.remove();
+                try {
+                    iterator.remove();
+                }catch (ConcurrentModificationException e){
+                    System.out.println("LOOOOOOOOOOOOOOOOOL");
+                }
 
             }
         }
@@ -130,7 +148,7 @@ public class AsynchronousServerImpl extends Thread implements AsynchronousServer
         serverSocket.configureBlocking(false);
         int ops = serverSocket.validOps();
         selector = Selector.open();
-        SelectionKey selectionKey = serverSocket.register(selector, ops, null);
+        serverSocket.register(selector, ops, null);
 
         log.info("Server was started.");
 
@@ -162,26 +180,41 @@ public class AsynchronousServerImpl extends Thread implements AsynchronousServer
         SocketAddress local = client.getLocalAddress();
         SocketAddress remote = client.getRemoteAddress();
         client.close();
-        log.info("New client (" + local + " | " + remote + ") was disconnected.");
+        log.info("Client (" + local + " | " + remote + ") was disconnected.");
     }
 
 
     /**
-     * Receives message from client.
+     * Receives messages from client.
      *
-     * @return Message that was received. NULL if the message was not received.
-     * @throws IOException if message can not be received.
+     * @return Messages that were received. NULL if the messages were not received.
+     * @throws IOException if messages can not be received.
      */
     @Override
-    public String readMessage() throws IOException {
+    public List<String> readMessages() throws IOException {
+        ArrayList<String> messages = null;
         ByteBuffer byteBuffer = ByteBuffer.allocate(256);
         SocketChannel client = (SocketChannel) clientSelectionKey.channel();
         client.read(byteBuffer);
-        String output = new String(byteBuffer.array()).trim();
+        String output = new String(byteBuffer.array());
+
+        int beginMessage = 0;
+
+        if (output.length()>0){
+            messages = new ArrayList<>();
+            for (int i = 0; i < output.length(); i++) {
+                char nl = output.charAt(i);
+                if (nl==10){
+                    messages.add(output.substring(beginMessage,i));
+                    beginMessage=i+1;
+                }
+            }
+        }
         if (log.isDebugEnabled()) {
             log.debug("Message: \"" + output + "\"" + " was received");
         }
-        return output;
+
+        return messages;
     }
 
     /**
@@ -193,6 +226,7 @@ public class AsynchronousServerImpl extends Thread implements AsynchronousServer
      */
     @Override
     public boolean sendMessage(String message) {
+        message+="\n";
         SocketChannel client = (SocketChannel) clientSelectionKey.channel();
         ByteBuffer buffer = ByteBuffer.wrap(message.getBytes());
         try {

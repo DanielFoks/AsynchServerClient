@@ -1,12 +1,12 @@
 package com.andersen.asynchronous;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -21,8 +21,30 @@ public class AsynchronousServerTest {
     }
 
     @Test
-    public void testAsynchronousServer() {
+    public void testAsynchronousServer() throws IOException {
         ExecutorService executor = Executors.newFixedThreadPool(10);
+
+        char[] alphabet = new char[25];
+
+        int count = 0;
+
+        for (char j = 'a'; j < 'z'; j++) {
+            alphabet[count] = j;
+            count++;
+        }
+
+        Random random = new Random();
+
+        String[] clientsMessages = new String[random.nextInt(5)];
+
+        for (int j = 0; j < clientsMessages.length; j++) {
+            int messageSize = random.nextInt(100);
+            StringBuilder stringBuilder = new StringBuilder();
+            for (int k = 0; k < messageSize; k++) {
+                stringBuilder.append(alphabet[random.nextInt(25)]);
+            }
+            clientsMessages[j] = stringBuilder.toString();
+        }
 
         for (int i = 0; i < 1000; i++) {
 
@@ -31,23 +53,20 @@ public class AsynchronousServerTest {
                 AsynchronousClientImpl asynchronousClient = new AsynchronousClientImpl(new InetSocketAddress("localhost", 32454));
 
                 try {
-                    asynchronousClient.sendMessage("Hello");
-                    Assert.assertEquals("Hello", asynchronousClient.readMessage());
-                    asynchronousClient.sendMessage("World");
-                    Assert.assertEquals("World", asynchronousClient.readMessage());
-                    asynchronousClient.sendMessage("Exit");
-                    Assert.assertEquals("Exit", asynchronousClient.readMessage());
-                } catch (InterruptedException e) {
+
+                    for (int j = 0; j < clientsMessages.length; j++) {
+                        asynchronousClient.sendMessage(clientsMessages[j]);
+                        Assert.assertEquals(asynchronousClient.readMessages().get(0),clientsMessages[j].toUpperCase());
+                    }
+
+                    asynchronousClient.closeConnection();
+
+                }catch (InterruptedException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
-                try {
-                    asynchronousClient.closeConnection();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
 
             });
         }
@@ -57,13 +76,8 @@ public class AsynchronousServerTest {
         while (!executor.isTerminated()) {
         }
 
+        server.closeConnection();
         Assert.assertEquals(1000, server.getTotalNumbersOfClients());
     }
-
-    @After
-    public void closeServerConnection() throws IOException {
-        server.closeConnection();
-    }
-
 
 }

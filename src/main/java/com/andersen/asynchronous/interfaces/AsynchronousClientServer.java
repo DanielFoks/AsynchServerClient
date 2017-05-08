@@ -2,6 +2,7 @@ package com.andersen.asynchronous.interfaces;
 
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * General methods for working with the asynchronous server and the client.
@@ -9,12 +10,12 @@ import java.io.IOException;
 public interface AsynchronousClientServer {
 
     /**
-     * Receives message from client or server.
+     * Receives messages from client or server.
      *
-     * @return Message that was received. NULL if the message was not received.
+     * @return Messages that were received. NULL if the messages were not received.
      * @throws IOException if message can not be received.
      */
-    String readMessage() throws IOException;
+    List<String> readMessages() throws IOException;
 
     /**
      * Sends message to client or server.
@@ -30,5 +31,5 @@ public interface AsynchronousClientServer {
      *
      * @throws IOException if can not close channel.
      */
-    void closeConnection() throws IOException;
+    void closeConnection() throws IOException, InterruptedException;
 }

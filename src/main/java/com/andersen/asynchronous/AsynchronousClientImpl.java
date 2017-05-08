@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
 
 /**
  * Asynchronous client.
@@ -58,22 +59,36 @@ public class AsynchronousClientImpl implements AsynchronousClient {
     }
 
     /**
-     * Receives message from server.
+     * Receives messages from server.
      *
-     * @return Message that was received. NULL if the message was not received.
-     * @throws IOException if message can not be received.
+     * @return Messages that were received. NULL if the messages were not received.
+     * @throws IOException if messages can not be received.
      */
     @Override
-    public String readMessage() throws IOException {
+    public ArrayList<String> readMessages() throws IOException {
+        ArrayList<String> messages = null;
         clientChannel.read(clientBuffer);
-        String output = new String(clientBuffer.array()).trim();
+        String output = new String(clientBuffer.array());
         clientBuffer.flip();
+
+        int beginMessage = 0;
+
+        if (output.length()>0){
+            messages = new ArrayList<>();
+            for (int i = 0; i < output.length(); i++) {
+                char nl = output.charAt(i);
+                if (nl==10){
+                    messages.add(output.substring(beginMessage,i));
+                    beginMessage=i+1;
+                }
+            }
+        }
 
         if (log.isDebugEnabled()) {
             log.debug("Message: \"" + output + "\"" + " was received");
         }
 
-        return output;
+        return messages;
     }
 
     /**
@@ -86,6 +101,7 @@ public class AsynchronousClientImpl implements AsynchronousClient {
      */
     @Override
     public boolean sendMessage(String message) throws InterruptedException {
+        message+="\n";
         clientBuffer = ByteBuffer.wrap(message.getBytes());
         try {
 
@@ -94,7 +110,7 @@ public class AsynchronousClientImpl implements AsynchronousClient {
             if (log.isDebugEnabled()) {
                 log.debug("Message: \"" + message + "\"" + " was sent");
             }
-            Thread.sleep(1000);
+            /*Thread.sleep(1000);*/
             return true;
         } catch (IOException e) {
             log.error("Can not send the message: " + e.getMessage(), e);
@@ -108,7 +124,8 @@ public class AsynchronousClientImpl implements AsynchronousClient {
      * @throws IOException If can not close channel.
      */
     @Override
-    public void closeConnection() throws IOException {
+    public void closeConnection() throws IOException, InterruptedException {
+        sendMessage("exit");
         clientChannel.close();
         log.info("ClientChannel was closed.");
     }
