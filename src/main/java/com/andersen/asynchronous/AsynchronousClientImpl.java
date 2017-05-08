@@ -122,6 +122,7 @@ public class AsynchronousClientImpl implements AsynchronousClient {
      * Close client channel.
      *
      * @throws IOException If can not close channel.
+     * @throws InterruptedException If can not send message.
      */
     @Override
     public void closeConnection() throws IOException, InterruptedException {
