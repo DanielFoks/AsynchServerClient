@@ -102,16 +102,16 @@ public class AsynchronousServerImpl extends Thread implements AsynchronousServer
                 } else if (clientSelectionKey.isReadable()) {
                     try {
                         List<String> messages = readMessages();
-                        if (readMessages()!=null){
+                        if (readMessages() != null) {
                             inner:
-                            for (String message:messages){
+                            for (String message : messages) {
 
                                 if (message.equals("exit")) {
                                     closeClientConnection();
                                     log.info("Connected clients: " + --connectedClients);
                                     break inner;
 
-                                }else {
+                                } else {
 
                                     sendMessage(message.toUpperCase());
 
@@ -125,7 +125,7 @@ public class AsynchronousServerImpl extends Thread implements AsynchronousServer
                 }
                 try {
                     iterator.remove();
-                }catch (ConcurrentModificationException e){
+                } catch (ConcurrentModificationException e) {
                     System.out.println("LOOOOOOOOOOOOOOOOOL");
                 }
 
@@ -200,13 +200,13 @@ public class AsynchronousServerImpl extends Thread implements AsynchronousServer
 
         int beginMessage = 0;
 
-        if (output.length()>0){
+        if (output.length() > 0) {
             messages = new ArrayList<>();
             for (int i = 0; i < output.length(); i++) {
                 char nl = output.charAt(i);
-                if (nl==10){
-                    messages.add(output.substring(beginMessage,i));
-                    beginMessage=i+1;
+                if (nl == 10) {
+                    messages.add(output.substring(beginMessage, i));
+                    beginMessage = i + 1;
                 }
             }
         }
@@ -226,7 +226,7 @@ public class AsynchronousServerImpl extends Thread implements AsynchronousServer
      */
     @Override
     public boolean sendMessage(String message) {
-        message+="\n";
+        message += "\n";
         SocketChannel client = (SocketChannel) clientSelectionKey.channel();
         ByteBuffer buffer = ByteBuffer.wrap(message.getBytes());
         try {

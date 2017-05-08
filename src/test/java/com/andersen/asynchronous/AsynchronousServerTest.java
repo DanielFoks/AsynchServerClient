@@ -33,18 +33,6 @@ public class AsynchronousServerTest {
             count++;
         }
 
-        Random random = new Random();
-
-        String[] clientsMessages = new String[random.nextInt(5)];
-
-        for (int j = 0; j < clientsMessages.length; j++) {
-            int messageSize = random.nextInt(100);
-            StringBuilder stringBuilder = new StringBuilder();
-            for (int k = 0; k < messageSize; k++) {
-                stringBuilder.append(alphabet[random.nextInt(25)]);
-            }
-            clientsMessages[j] = stringBuilder.toString();
-        }
 
         for (int i = 0; i < 1000; i++) {
 
@@ -54,14 +42,26 @@ public class AsynchronousServerTest {
 
                 try {
 
+                    Random random = new Random();
+
+                    String[] clientsMessages = new String[random.nextInt(5)];
+
+                    for (int j = 0; j < clientsMessages.length; j++) {
+                        StringBuilder stringBuilder = new StringBuilder();
+                        for (int k = 0; k < random.nextInt(200); k++) {
+                            stringBuilder.append(alphabet[random.nextInt(25)]);
+                        }
+                        clientsMessages[j] = stringBuilder.toString();
+                    }
+
                     for (int j = 0; j < clientsMessages.length; j++) {
                         asynchronousClient.sendMessage(clientsMessages[j]);
-                        Assert.assertEquals(asynchronousClient.readMessages().get(0),clientsMessages[j].toUpperCase());
+                        Assert.assertEquals(asynchronousClient.readMessages().get(0), clientsMessages[j].toUpperCase());
                     }
 
                     asynchronousClient.closeConnection();
 
-                }catch (InterruptedException e) {
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
                     e.printStackTrace();

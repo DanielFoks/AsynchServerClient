@@ -73,13 +73,13 @@ public class AsynchronousClientImpl implements AsynchronousClient {
 
         int beginMessage = 0;
 
-        if (output.length()>0){
+        if (output.length() > 0) {
             messages = new ArrayList<>();
             for (int i = 0; i < output.length(); i++) {
                 char nl = output.charAt(i);
-                if (nl==10){
-                    messages.add(output.substring(beginMessage,i));
-                    beginMessage=i+1;
+                if (nl == 10) {
+                    messages.add(output.substring(beginMessage, i));
+                    beginMessage = i + 1;
                 }
             }
         }
@@ -101,7 +101,7 @@ public class AsynchronousClientImpl implements AsynchronousClient {
      */
     @Override
     public boolean sendMessage(String message) throws InterruptedException {
-        message+="\n";
+        message += "\n";
         clientBuffer = ByteBuffer.wrap(message.getBytes());
         try {
 
@@ -121,7 +121,7 @@ public class AsynchronousClientImpl implements AsynchronousClient {
     /**
      * Close client channel.
      *
-     * @throws IOException If can not close channel.
+     * @throws IOException          If can not close channel.
      * @throws InterruptedException If can not send message.
      */
     @Override
