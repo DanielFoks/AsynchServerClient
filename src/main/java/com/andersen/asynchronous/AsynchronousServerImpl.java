@@ -196,7 +196,8 @@ public class AsynchronousServerImpl extends Thread implements AsynchronousServer
         ByteBuffer byteBuffer = ByteBuffer.allocate(256);
         SocketChannel client = (SocketChannel) clientSelectionKey.channel();
         client.read(byteBuffer);
-        String output = new String(byteBuffer.array());
+
+        String output = new String(byteBuffer.array(), "UTF-8");
 
         int beginMessage = 0;
 

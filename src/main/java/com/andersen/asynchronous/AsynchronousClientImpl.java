@@ -68,7 +68,7 @@ public class AsynchronousClientImpl implements AsynchronousClient {
     public ArrayList<String> readMessages() throws IOException {
         ArrayList<String> messages = null;
         clientChannel.read(clientBuffer);
-        String output = new String(clientBuffer.array());
+        String output = new String(clientBuffer.array(), "UTF-8");
         clientBuffer.flip();
 
         int beginMessage = 0;
